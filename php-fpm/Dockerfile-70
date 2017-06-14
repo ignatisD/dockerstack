@@ -36,7 +36,7 @@ MAINTAINER Mahmoud Zalt <mahmoud@zalt.me>
 #   - INSTALL_ZIP_ARCHIVE=true
 #   - ...
 #
-
+RUN docker-php-ext-install sockets
 #####################################
 # SOAP:
 #####################################

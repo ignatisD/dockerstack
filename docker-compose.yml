@@ -7,7 +7,7 @@ services:
     applications:
         image: tianon/true
         volumes:
-            - ../taxis-net/:/var/www/taxisnet
+            - ${APPLICATIONS}:/var/www
 
 ### Workspace Utilities Container ###########################
 
@@ -201,6 +201,15 @@ services:
             - NEO4J_AUTH=homestead:secret
         volumes:
             - neo4j:/var/lib/neo4j/data
+
+### Mailhog Container #########################################
+
+    mailhog:
+      dns_search: '' #fix for windows dns resolve.conf
+      build: ./mailhog
+      ports:
+        - "1025:1025"
+        - "8025:8025"
 
 ### MongoDB Container #######################################
 
