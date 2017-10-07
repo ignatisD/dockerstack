@@ -8,19 +8,19 @@ while true; do
     echo ""
     echo "1. Workspace root"
     echo "2. Workspace non-root"
-    echo "3. Restart applications"
-    echo "4. Start node and mongo containers"
-    echo "5. Stop node and mongo containers"
-    echo "6. Node non-root user"
-    echo "7. Start Basic containers"
-    echo "8. Stop all containers"
+    echo "3. Start node and mongo containers"
+    echo "4. Stop node and mongo containers"
+    echo "5. Node non-root user"
+    echo "6. Start Basic containers"
+    echo "7. Stop all containers"
+    echo "8. Start mailhog container"
     echo "9. Docker container list (ps)"
-    echo "10. Start Basic containers"
-    echo "11. Stop all containers"
+    echo "10. Start elasticsearch container"
+    echo "11. Stop elasticsearch container"
     echo "12. Start Redis and Memcached containers"
     echo "13. Stop Redis and Memcached containers"
-    echo "14. Start elasticsearch extra container"
-    echo "15. Stop elasticsearch extra container"
+    echo "14. Start php-worker extra container"
+    echo "15. Stop php-worker extra container"
     echo "16. Rebuild all containers"
     echo ""
     echo -n "Select a number or type a command: "
@@ -34,37 +34,37 @@ while true; do
             docker-compose exec --user laradock workspace bash
             ;;
         3)
-            docker-compose up applications
+            docker-compose up -d node mongo mailhog
             ;;
         4)
-            docker-compose up -d node mongo
+            docker-compose stop node mongo mailhog
+            docker-compose rm -f node mongo mailhog
             ;;
         5)
-            docker-compose stop node mongo
-            docker-compose rm -f node mongo
-            ;;
-        6)
             docker-compose exec --user node node bash
             ;;
-        7)
+        6)
             docker-compose up -d apache2_nolara mysql phpmyadmin workspace php-fpm mailhog
             read -p "Continue to menu..."
             ;;
-        8)
+        7)
             docker-compose stop
             docker-compose rm -f
             read -p "Continue to menu..."
+            ;;
+        8)
+            docker-compose up -d mailhog
             ;;
         9)
             docker-compose ps
             read -p "Continue to menu..."
             ;;
         10)
-            docker-compose up -d mysql elasticsearch
+            docker-compose up -d elasticsearch
             ;;
         11)
-            docker-compose stop mysql elasticsearch
-            docker-compose rm -f mysql elasticsearch
+            docker-compose stop elasticsearch
+            docker-compose rm -f elasticsearch
             ;;
         12)
             docker-compose up -d redis memcached
