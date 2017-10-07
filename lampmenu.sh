@@ -2,7 +2,7 @@
 while true; do
     clear
     echo "==============================="
-    echo "==  Lamp stack using Docker  =="
+    echo "=  LAMP & MEAN using Docker   ="
     echo "==============================="
     echo "Press [q] to quit this menu"
     echo ""
