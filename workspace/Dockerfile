@@ -380,8 +380,12 @@ RUN if [ ${INSTALL_LINUXBREW} = true ]; then \
 #--------------------------------------------------------------------------
 #
 
-# Clean up
 USER root
+
+# Installing mysql client to run mysql commands
+RUN apt-get update && \
+    apt-get upgrade -y && apt-get install -y mysql-client htop
+
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
