@@ -9,6 +9,33 @@ services:
         volumes:
             - ${APPLICATIONS}:/var/www
 
+### Node and Workspace Container #######################################
+
+    node:
+        hostname: 18-24.mean
+        dns:
+          - "8.8.8.8"
+          - "8.8.4.4"
+        dns_search: '' #fix for windows dns resolve.conf
+        build:
+            context: ./node
+            args:
+              - TZ=${NODE_TIMEZONE}
+              - NODE_INSTALL_ANGULAR_CLI=${NODE_INSTALL_ANGULAR_CLI}
+            dockerfile: "Dockerfile"
+        volumes_from:
+            - applications
+        extra_hosts:
+            - "dockerhost:${DOCKER_HOST_IP}"
+            - "${EXTRA_HOST}:127.0.0.1"
+        expose:
+            - "${ANGULAR_CLI_PORT}"
+        ports:
+            - "${NODE_SSH_PORT}:22"
+            - "${ANGULAR_CLI_PORT}:4200"
+            - "${HTTP_PORT}:3000"
+        tty: true
+
 ### Workspace Utilities Container ###########################
 
     workspace:
@@ -216,9 +243,13 @@ services:
     mongo:
         build: ./mongo
         ports:
-            - "27017:27017"
+            - "${MONGODB_PORT}:27017"
         volumes:
-            - mongo:/data/db
+            - ${DATA_SAVE_PATH}/mongo:/data/db
+        command:
+            - "mongod"
+        # The first time comment out the auth section to setup a user
+        #  - "--auth"
 
 ### RethinkDB Container #######################################
 
