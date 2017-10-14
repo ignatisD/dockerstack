@@ -37,6 +37,7 @@ MAINTAINER Mahmoud Zalt <mahmoud@zalt.me>
 #   - ...
 #
 RUN docker-php-ext-install sockets
+RUN docker-php-ext-install mbstring
 #####################################
 # SOAP:
 #####################################
@@ -92,8 +93,7 @@ RUN if [ ${INSTALL_MONGO} = true ]; then \
 ARG INSTALL_ZIP_ARCHIVE=false
 RUN if [ ${INSTALL_ZIP_ARCHIVE} = true ]; then \
     # Install the zip extension
-    pecl install zip && \
-    docker-php-ext-enable zip \
+    docker-php-ext-install zip \
 ;fi
 
 #####################################

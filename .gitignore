@@ -3,3 +3,4 @@ _guides
 /logs
 /data
 /ign_drak.sql
+.env

@@ -56,7 +56,7 @@ while true; do
             read -p "Continue to menu..."
             ;;
         10)
-            docker-compose up -d apache2_nolara mysql phpmyadmin workspace php-fpm mailhog
+            docker-compose up -d apache2_nolara workspace php-fpm mailhog
             read -p "Continue to menu..."
             ;;
         11)
