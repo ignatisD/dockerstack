@@ -42,6 +42,7 @@ while true; do
              ;;
          5)
              docker-compose up -d node mongo mailhog
+             read -p "Continue to menu..."
              ;;
          6)
              docker-compose exec node bash
@@ -65,6 +66,7 @@ while true; do
              ;;
          11)
              docker-compose up -d mysql
+             read -p "Continue to menu..."
              ;;
          12)
              docker-compose up -d phpmyadmin
@@ -81,8 +83,7 @@ while true; do
          16)
              docker-compose stop
              docker-compose rm -f
-             docker-compose build apache2 mysql workspace php-fpm mailhog node mongo
-             docker-compose build redis memcached beanstalkd elasticsearch phpmyadmin
+             docker-compose build apache2 mysql workspace php-fpm mailhog node mongo redis memcached beanstalkd elasticsearch phpmyadmin
              read -p "Continue to menu..."
              ;;
          q)

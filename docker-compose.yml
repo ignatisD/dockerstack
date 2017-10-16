@@ -31,9 +31,9 @@ services:
         expose:
             - "${ANGULAR_CLI_PORT}"
         ports:
+            - "${NODE_PORT}:3000"
             - "${NODE_SSH_PORT}:22"
             - "${ANGULAR_CLI_PORT}:4200"
-            - "${HTTP_PORT}:3000"
         tty: true
 
 ### Workspace Utilities Container ###########################
@@ -64,9 +64,9 @@ services:
             - applications
         extra_hosts:
             # IMPORTANT: Replace with your Docker Host IP (will be appended to /etc/hosts)
-            - "dockerhost:10.0.75.0"
+            - "dockerhost:${DOCKERHOST}"
         ports:
-           - "2222:22"
+           - "${WORKSPACE_SSH_PORT}:22"
         tty: true
 
 ### PHP-FPM Container #######################################
@@ -90,12 +90,12 @@ services:
         volumes_from:
             - applications
         expose:
-            - "9000"
+            - "${PHP_FPM}"
         links:
             - workspace
         extra_hosts:
             # IMPORTANT: Replace with your Docker Host IP (will be appended to /etc/hosts)
-            - "dockerhost:10.0.75.0"
+            - "dockerhost:${DOCKERHOST}"
         environment:
             # IMPORTANT: Set the Remote Interpreter entry matching name to `laravel`
             - PHP_IDE_CONFIG=serverName=laravel
@@ -113,8 +113,8 @@ services:
             - ./logs/nginx/:/var/log/nginx
             - ./nginx/sites/:/etc/nginx/sites-available
         ports:
-            - "80:80"
-            - "443:443"
+            - "${HTTP_PORT}:80"
+            - "${HTTPS_PORT}:443"
         links:
             - php-fpm
 
@@ -130,21 +130,11 @@ services:
         volumes:
             - ./logs/apache2:/var/log/apache2
         ports:
-            - "80:80"
-            - "443:443"
+            - "${HTTP_PORT}:80"
+            - "${HTTPS_PORT}:443"
         links:
             - php-fpm
 
-### HHVM Container ##########################################
-
-    hhvm:
-        build: ./hhvm
-        volumes_from:
-            - applications
-        expose:
-            - "9000"
-        links:
-            - workspace
 
 ### MySQL Container #########################################
 
@@ -152,14 +142,14 @@ services:
         build:
             context: ./mysql
             args:
-                - MYSQL_DATABASE=ign_drak
-                - MYSQL_USER=jamesmort
-                - MYSQL_PASSWORD=iggi1874
-                - MYSQL_ROOT_PASSWORD=iggi1874
+                - MYSQL_DATABASE=${DB_NAME}
+                - MYSQL_USER=${DB_USER}
+                - MYSQL_PASSWORD=${DB_PASS}
+                - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASS}
         volumes:
             - mysql:/var/lib/mysql
         ports:
-            - "3306:3306"
+            - "${DB_PORT}:3306"
 
 ### MariaDB Container #######################################
 
@@ -168,50 +158,13 @@ services:
         volumes:
             - mariadb:/var/lib/mysql
         ports:
-            - "3307:3306"
+            - "${DB_PORT}:3306"
         environment:
-            MYSQL_DATABASE: homestead
-            MYSQL_USER: homestead
-            MYSQL_PASSWORD: secret
-            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: ${DB_NAME}
+            MYSQL_USER: ${DB_USER}
+            MYSQL_PASSWORD: ${DB_PASS}
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
 
-### PostgreSQL Container ####################################
-
-    postgres:
-        build: ./postgres
-        volumes:
-            - postgres:/var/lib/postgresql/data
-        ports:
-            - "5432:5432"
-        environment:
-            POSTGRES_DB: homestead
-            POSTGRES_USER: homestead
-            POSTGRES_PASSWORD: secret
-
-### PostgreSQL PostGis Container ############################
-
-    postgres-postgis:
-        build: ./postgres-postgis
-        volumes:
-            - postgres:/var/lib/postgresql/data
-        ports:
-            - "5432:5432"
-        environment:
-            POSTGRES_DB: homestead
-            POSTGRES_USER: homestead
-            POSTGRES_PASSWORD: secret
-
-### Neo4j Container #########################################
-
-    neo4j:
-        build: ./neo4j
-        ports:
-            - "7474:7474"
-            - "1337:1337"
-        environment:
-            - NEO4J_AUTH=homestead:secret
-        volumes:
-            - neo4j:/var/lib/neo4j/data
 
 ### Mailhog Container #########################################
 
@@ -241,7 +194,7 @@ services:
     rethinkdb:
         build: ./rethinkdb
         ports:
-            - "8090:8080"
+            - "${RETHINKDB_PORT}:8080"
         volumes:
             - rethinkdb:/data/rethinkdb_data
 
@@ -252,21 +205,7 @@ services:
         volumes:
             - redis:/data
         ports:
-            - "6379:6379"
-
-### Aerospike c Container ###################################
-
-    aerospike:
-        build: ./aerospike
-        volumes_from:
-            - workspace
-        volumes:
-            - aerospike:/opt/aerospike/data
-        ports:
-            - "3000:3000"
-            - "3001:3001"
-            - "3002:3002"
-            - "3003:3003"
+            - "${REDIS_PORT}:6379"
 
 
 ### Memcached Container #####################################
@@ -276,7 +215,7 @@ services:
         volumes:
             - memcached:/var/lib/memcached
         ports:
-            - "11211:11211"
+            - "${MEMCACHED_PORT}:11211"
         links:
             - php-fpm
 
@@ -285,50 +224,20 @@ services:
     beanstalkd:
         build: ./beanstalkd
         ports:
-            - "11300:11300"
+            - "${BEANSTALKD_PORT}:11300"
         privileged: true
         links:
             - php-fpm
 
-### RabbitMQ Container ######################################
-
-    rabbitmq:
-        build: ./rabbitmq
-        ports:
-            - "5672:5672"
-            - "15671:15671"
-            - "8080:15672"
-        privileged: true
-        environment:
-            RABBITMQ_DEFAULT_USER: guest
-            RABBITMQ_DEFAULT_PASS: guest
-        links:
-            - php-fpm
 
 ### Beanstalkd Console Container ############################
 
     beanstalkd-console:
         build: ./beanstalkd-console
         ports:
-            - "2080:2080"
+            - "${BEANCONSOLE_PORT}:2080"
         links:
             - beanstalkd
-
-### Caddy Server Container ##################################
-
-    caddy:
-        build: ./caddy
-        ports:
-            - "80:80"
-            - "443:443"
-            - "2015:2015"
-        volumes_from:
-            - applications
-        volumes:
-            - ./caddy/Caddyfile:/etc/Caddyfile
-            - ./logs/caddy:/var/log/caddy
-        links:
-            - php-fpm
 
 ### phpMyAdmin Container ####################################
 
@@ -336,25 +245,14 @@ services:
         build: ./phpmyadmin
         environment:
             PMA_ARBITRARY: 1
-            MYSQL_USER: jamesmort
-            MYSQL_PASSWORD: iggi1874
-            MYSQL_ROOT_PASSWORD: iggi1874
+            MYSQL_USER: ${DB_USER}
+            MYSQL_PASSWORD: ${DB_PASS}
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
         ports:
-            - "8080:80"
+            - "${PHPMYADMIN_PORT}:80"
         links:
             # for mysql container
-            - "mysql:db"
-            # for mariadb container
-            # - "mariadb:db"
-
-### pgAdmin Container #######################################
-
-    pgadmin:
-        build: ./pgadmin
-        ports:
-            - "5050:5050"
-        links:
-            - postgres
+            - "${DB_HOST}:db"
 
 ### ElasticSearch Container #################################
 
@@ -364,30 +262,19 @@ services:
             - elasticsearch-data:/usr/share/elasticsearch/data
             - elasticsearch-plugins:/usr/share/elasticsearch/data
         ports:
-            - "9200:9200"
+            - "${ELASTICSEARCH_PORT}:9200"
             - "9300:9300"
         links:
             - php-fpm
-
-### Selenium Container #########################################
-
-    selenium:
-        build: ./selenium
-        ports:
-            - "4444:4444"
 
 ### Volumes Setup ###########################################
 
 volumes:
     mysql:
         driver: "local"
-    postgres:
-        driver: "local"
     memcached:
         driver: "local"
     redis:
-        driver: "local"
-    neo4j:
         driver: "local"
     mariadb:
         driver: "local"
@@ -396,10 +283,6 @@ volumes:
     rethinkdb:
         driver: "local"
     phpmyadmin:
-        driver: "local"
-    aerospike:
-        driver: "local"
-    caddy:
         driver: "local"
     elasticsearch-data:
         driver: "local"
