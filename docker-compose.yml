@@ -134,22 +134,6 @@ services:
             - "443:443"
         links:
             - php-fpm
-### Apache Server Container #################################
-
-    apache2_nolara:
-        build:
-            context: ./apache2_nolara
-            args:
-                - PHP_SOCKET=php-fpm:9000
-        volumes_from:
-            - applications
-        volumes:
-            - ./logs/apache2:/var/log/apache2
-        ports:
-            - "80:80"
-            - "443:443"
-        links:
-            - php-fpm
 
 ### HHVM Container ##########################################
 

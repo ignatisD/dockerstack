@@ -8,6 +8,12 @@ ENV WEB_PHP_SOCKET=$PHP_SOCKET
 
 ENV WEB_DOCUMENT_ROOT=/var/www/
 
+RUN apt-get update
+
+RUN apt-get update && apt-get -y install libxml2-dev
+RUN a2enmod proxy*
+RUN a2enmod xml2enc
+
 EXPOSE 80 443
 
 WORKDIR /var/www/
