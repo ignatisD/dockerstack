@@ -48,6 +48,25 @@ chmod +x lampmenu.sh
 ![Lamp menu preview](icons/lampmenu.png?raw=true "LAMP & MEAN stack menu preview")
 
 - Then choose number 16 to build the containers (this will initially take a lot of time)
+- LAMP stack containers are: 
+    - `apache2`
+    - `mysql` 
+    - `workspace` 
+    - `php-fpm` 
+    - `mailhog`
+- MEAN stack containers are:
+    - `node`
+    - `mongo`
+    - `mailhog`
+- Extra containers included:
+    - `phpmyadmin`
+    - `mariadb`
+    - `rethinkdb`
+    - `php-worker`
+    - `elasticsearch`
+    - `beanstalkd`
+    - `redis`
+    - `memcached`
 
 ### 5. Finally
 
