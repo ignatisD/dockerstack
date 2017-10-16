@@ -45,6 +45,7 @@ cp env_example .env
 chmod +x lampmenu.sh
 ./lampmenu.sh
 ``` 
+![Lamp menu preview](icons/lampmenu.png?raw=true "LAMP & MEAN stack menu preview")
 
 - Then choose number 16 to build the containers (this will initially take a lot of time)
 

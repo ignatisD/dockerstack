@@ -21,7 +21,7 @@ while true; do
     echo "13. Start Mailhog container"
     echo "14. Start php-worker container"
     echo "15. Start Redis, Memcached, Beanstalkd and Elasticsearch containers"
-    echo "16. Rebuild all containers"
+    echo "16. Build all containers"
     echo ""
     echo -n "Select a number or type a command: "
     read input
