@@ -20,7 +20,7 @@ while true; do
     echo "12. Start PhpMyAdmin container"
     echo "13. Start Mailhog container"
     echo "14. Start php-worker container"
-    echo "15. Start Redis, Memcached and Elasticsearch containers"
+    echo "15. Start Redis, Memcached, Beanstalkd and Elasticsearch containers"
     echo "16. Rebuild all containers"
     echo ""
     echo -n "Select a number or type a command: "
@@ -76,7 +76,7 @@ while true; do
              docker-compose up -d php-worker
              ;;
          15)
-             docker-compose up -d redis memcached elasticsearch
+             docker-compose up -d redis memcached beanstalkd elasticsearch
              ;;
          16)
              docker-compose stop

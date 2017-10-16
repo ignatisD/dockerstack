@@ -1,10 +1,14 @@
-COMPOSE_CONVERT_WINDOWS_PATHS=1
-DB_HOST=mysql
-REDIS_HOST=redis
-QUEUE_HOST=beanstalkd
+############################
+###   WORKING DIRECTORY  ###
+############################
+
+# Point to your working directory relative to lamp_stack
 APPLICATION=../
 
-### NODE ############################################################################################################
+############################
+###         NODE         ###
+############################
+
 HTTP_PORT=80
 NODE_INSTALL_NODE_SSH=true
 NODE_TIMEZONE=UTC
@@ -13,14 +17,19 @@ NODE_INSTALL_ANGULAR_CLI=true
 ANGULAR_CLI_PORT=4201
 
 
-### MONGODB ############################################################################################################
+############################
+###       MONGODB        ###
+############################
+
 MONGODB_HOST=mongodb
 MONGODB_PORT=27017
-MONGODB_DATABASE=1824db
-MONGODB_USERNAME=1824user
-MONGODB_PASSWORD=1824pass
+MONGODB_DATABASE=testdb
+MONGODB_USERNAME=testuser
+MONGODB_PASSWORD=testpass
 
-### MAIL #########################################################################################################
+############################
+###         MAIL         ###
+############################
 
 MAIL_DRIVER=smtp
 MAIL_HOST=mailhog
@@ -30,13 +39,13 @@ MAIL_PASSWORD=null
 MAIL_ENCRYPTION=null
 
 ############################
-# Miscellaneous
+###     Miscellaneous    ###
 ############################
 
 # Replace with your Docker Host IP (will be appended to /etc/hosts)
 
 DOCKER_HOST_IP=10.0.75.1
-EXTRA_HOST=www.18-24.mean
+EXTRA_HOST=localhost
 
 # Fix for windows users to make sure the application path works.
 
@@ -46,3 +55,9 @@ COMPOSE_CONVERT_WINDOWS_PATHS=1
 # For all storage systems.
 
 DATA_SAVE_PATH=~/.lamp-stack/data
+
+# Optional Laravel environmental vars
+
+DB_HOST=mysql
+REDIS_HOST=redis
+QUEUE_HOST=beanstalkd
