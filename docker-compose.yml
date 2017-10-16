@@ -249,6 +249,7 @@ services:
         command:
             - "mongod"
         # The first time comment out the auth section to setup a user
+        # Afterwards enable the auth section for security
         #  - "--auth"
 
 ### RethinkDB Container #######################################
