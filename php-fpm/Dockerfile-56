@@ -34,8 +34,11 @@ MAINTAINER Mahmoud Zalt <mahmoud@zalt.me>
 # in the `docker-compose.yml` before the build.
 # Example:
 #   - INSTALL_ZIP_ARCHIVE=true
+#   - ...
 #
-
+RUN docker-php-ext-install sockets
+RUN docker-php-ext-install mbstring
+RUN docker-php-ext-install mysqli
 #####################################
 # SOAP:
 #####################################
@@ -59,6 +62,17 @@ RUN if [ ${INSTALL_XDEBUG} = true ]; then \
     docker-php-ext-enable xdebug \
 ;fi
 
+#####################################
+# PHP REDIS EXTENSION FOR PHP 7.0
+#####################################
+ARG INSTALL_PHPREDIS=false
+RUN if [ ${INSTALL_PHPREDIS} = true ]; then \
+    # Install Php Redis Extension
+    pecl install -o -f redis \
+    &&  rm -rf /tmp/pear \
+    &&  docker-php-ext-enable redis \
+;fi
+
 # Copy xdebug configration for remote debugging
 COPY ./xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
@@ -80,8 +94,7 @@ RUN if [ ${INSTALL_MONGO} = true ]; then \
 ARG INSTALL_ZIP_ARCHIVE=false
 RUN if [ ${INSTALL_ZIP_ARCHIVE} = true ]; then \
     # Install the zip extension
-    pecl install zip && \
-    docker-php-ext-enable zip \
+    docker-php-ext-install zip \
 ;fi
 
 #####################################

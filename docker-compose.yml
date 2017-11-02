@@ -86,7 +86,7 @@ services:
                 - INSTALL_EXIF=false
                 - INSTALL_AEROSPIKE_EXTENSION=false
                 - CODEIGNITER=false
-            dockerfile: Dockerfile-70
+            dockerfile: Dockerfile-${PHP_VERSION}
         volumes_from:
             - applications
         expose:
