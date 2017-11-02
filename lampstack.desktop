@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=true
+Icon=~/projects/lamp_stack/icons/lamp.png
+Name=Lamp Stack Menu
+Exec=bash -c "cd ~/projects/lamp_stack && ./lampmenu.sh"
+Comment=Opens Lamp Stack menu script
