@@ -88,7 +88,7 @@ RUN if [ ${NODE_INSTALL_ANGULAR_CLI} = true ]; then \
 USER root
 
 # Installing mysql client to run mysql commands
-RUN apt-get install -y mysql-client
+RUN apt-get update && apt-get install -y mysql-client
 
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
