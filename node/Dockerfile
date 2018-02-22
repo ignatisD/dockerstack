@@ -1,5 +1,5 @@
  # Create image based on the official Node 6 image from the dockerhub
-FROM node:8.6
+FROM node:8.9.3
 RUN apt-get update && apt-get install -y locales \
 	&& localedef -i el_GR -c -f UTF-8 -A /usr/share/locale/locale.alias el_GR.UTF-8 \
 	&& localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
@@ -55,27 +55,17 @@ ADD authorized_keys /tmp/authorized_keys
 
 RUN if [ ${INSTALL_NODE_SSH} = true ]; then \
     rm -f /etc/service/sshd/down && \
-    cat /tmp/id_rsa.pub >> /root/.ssh/authorized_keys \
-        && cat /tmp/id_rsa.pub >> /root/.ssh/id_rsa.pub \
-        && cat /tmp/id_rsa >> /root/.ssh/id_rsa \
+    cat /tmp/id_rsa.pub > /root/.ssh/id_rsa.pub \
+        && cat /tmp/id_rsa.pub > /home/node/.ssh/id_rsa.pub \
+        && cat /tmp/id_rsa > /root/.ssh/id_rsa \
+        && cat /tmp/id_rsa > /home/node/.ssh/id_rsa \
         && cat /tmp/authorized_keys >> /root/.ssh/authorized_keys \
+        && cat /tmp/authorized_keys >> /home/node/.ssh/authorized_keys \
         && rm -f /tmp/id_rsa* \
         && rm -f /tmp/authorized_keys \
         && chmod 644 /root/.ssh/authorized_keys /root/.ssh/id_rsa.pub \
-    && chmod 400 /root/.ssh/id_rsa \
-;fi
-
-#####################################
-# Angular-cli:
-#####################################
-
-USER root
-
-ARG NODE_INSTALL_ANGULAR_CLI=false
-ENV NODE_INSTALL_ANGULAR_CLI ${NODE_INSTALL_ANGULAR_CLI}
-
-RUN if [ ${NODE_INSTALL_ANGULAR_CLI} = true ]; then \
-    yarn global add gulp bower @angular/cli@latest \
+        && chmod 644 /home/node/.ssh/authorized_keys /home/node/.ssh/id_rsa.pub \
+    && chmod 400 /root/.ssh/id_rsa /home/node/.ssh/id_rsa \
 ;fi
 
 #

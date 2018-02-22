@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+if [ ! -f ".env" ]; then
+    cp .env.example .env
+fi;
 while true; do
     clear
     echo "==============================="
@@ -8,11 +11,11 @@ while true; do
     echo ""
     echo "1. Start LAMP containers"
     echo "2. Workspace root bash"
-    echo "3. Workspace non-root bash"
+    echo "3. Hot reload nginx conf"
     echo "4. Php-fpm root bash"
     echo "5. Start MEAN containers"
     echo "6. Node root user"
-    echo "7. Node non-root user"
+    echo "7. Hot reload nginx-node conf"
     echo "8. Stop node and mongo containers"
     echo "9. Docker container list (ps)"
     echo "10. Stop all containers"
@@ -28,45 +31,39 @@ while true; do
 
     case "$input" in
          1)
-             docker-compose up -d apache2 mysql workspace php-fpm mailhog
-             read -p "Continue to menu..."
+             docker-compose up -d apache2 mysql workspace php-fpm mailhog nginx
              ;;
          2)
              docker-compose exec workspace bash
              ;;
          3)
-             docker-compose exec --user laradock workspace bash
+             docker-compose exec nginx bash -c "service nginx reload"
              ;;
          4)
              docker-compose exec php-fpm bash
              ;;
          5)
-             docker-compose up -d node mongo mailhog
-             read -p "Continue to menu..."
+             docker-compose up -d redis node mongo mailhog nginx-node
              ;;
          6)
              docker-compose exec node bash
              ;;
          7)
-             docker-compose exec --user node node bash
+             docker-compose exec nginx-node bash -c "service nginx reload"
              ;;
          8)
-             docker-compose stop node mongo
+             docker-compose stop node mongo redis
              docker-compose rm -f
-             read -p "Continue to menu..."
              ;;
          9)
              docker-compose ps
-             read -p "Continue to menu..."
              ;;
          10)
-             docker-compose stop
+             docker stop $(docker ps -a -q)
              docker-compose rm -f
-             read -p "Continue to menu..."
              ;;
          11)
              docker-compose up -d mysql
-             read -p "Continue to menu..."
              ;;
          12)
              docker-compose up -d phpmyadmin
@@ -83,16 +80,15 @@ while true; do
          16)
              docker-compose stop
              docker-compose rm -f
-             docker-compose build apache2 mysql workspace php-fpm mailhog node mongo redis memcached beanstalkd elasticsearch phpmyadmin
-             read -p "Continue to menu..."
+             docker-compose build apache2 mysql workspace php-fpm mailhog node mongo redis memcached beanstalkd elasticsearch phpmyadmin nginx nginx-node
              ;;
          q)
              exit
              ;;
          *)
- 			 $input
+			 eval "$input"
  			 echo ""
-             read -p "Continue to menu..."
              ;;
      esac
+     read -p "Continue to menu..."
  done
