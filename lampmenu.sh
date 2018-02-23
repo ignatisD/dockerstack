@@ -2,6 +2,30 @@
 if [ ! -f ".env" ]; then
     cp .env.example .env
 fi;
+function check()
+{
+    result=$(echo "$1" | grep "$2" | sed -n -r 's/lampstack_[a-zA-Z0-9\-]*_[0-9].*(Up).*/\1/p')
+    if [[ "$result" != "Up" ]]; then
+        echo "Start";
+    else
+        echo "Stop";
+    fi;
+}
+function dockerps()
+{
+    export status=$(docker-compose ps)
+    export LAMP=$(check "$status" apache2)
+    export MEAN=$(check "$status" nginx-node)
+    export MAIL=$(check "$status" mailhog)
+    export MYSQL=$(check "$status" mysql)
+    export PHPMY=$(check "$status" phpmyadmin)
+    export MONGO=$(check "$status" mongo)
+    export REDIS=$(check "$status" redis)
+    export MEMCA=$(check "$status" memcached)
+    export BEANSTA=$(check "$status" beanstalkd)
+    export ELAS=$(check "$status" elasticsearch)
+}
+dockerps
 while true; do
     clear
     echo "==============================="
@@ -9,30 +33,40 @@ while true; do
     echo "==============================="
     echo "Press [q] to quit this menu"
     echo ""
-    echo "1. Start LAMP containers"
+    echo "1. $LAMP LAMP containers"
     echo "2. Workspace root bash"
     echo "3. Hot reload nginx conf"
     echo "4. Php-fpm root bash"
-    echo "5. Start MEAN containers"
+    echo "5. $MEAN MEAN containers"
     echo "6. Node root user"
-    echo "7. Npm start"
-    echo "8. Stop node and mongo containers"
+    echo "7. Hot reload nginx-node conf"
+    echo "8. Npm start"
     echo "9. Docker container list (ps)"
     echo "10. Stop all containers"
-    echo "11. Start Mysql container"
-    echo "12. Start PhpMyAdmin container"
-    echo "13. Start Mailhog container"
-    echo "14. Start Mongo container"
-    echo "15. Start Redis, Memcached, Beanstalkd and Elasticsearch containers"
-    echo "16. Build all containers"
+    echo "11. $MYSQL Mysql container"
+    echo "12. $PHPMY PhpMyAdmin container"
+    echo "13. $MAIL Mailhog container"
+    echo "14. $MONGO Mongo container"
+    echo "15. $REDIS Redis containers"
+    echo "16. $MEMCA Memcached container"
+    echo "17. $ELAS Elasticsearch container"
+    echo "18. $BEANSTA Beanstalkd and Beanstalkd console containers"
+    echo "0. Build all containers"
     echo ""
     echo -n "Select a number or type a command: "
     read input
 
     case "$input" in
          1)
-             docker-compose up -d apache2 mysql workspace php-fpm mailhog nginx
-             ;;
+            if [[ "$LAMP" != "Stop" ]]; then
+                docker-compose up -d mysql workspace php-fpm apache2 mailhog nginx
+                LAMP="Stop"
+            else
+                docker-compose stop nginx apache2 workspace php-fpm mailhog mysql
+                docker-compose rm -f
+                LAMP="Start"
+            fi;
+            ;;
          2)
              docker-compose exec workspace bash
              ;;
@@ -43,44 +77,117 @@ while true; do
              docker-compose exec php-fpm bash
              ;;
          5)
-             docker-compose up -d redis node mongo mailhog nginx-node
+             if [[ "$MEAN" != "Stop" ]]; then
+                docker-compose up -d node mongo mailhog nginx-node
+                MEAN="Stop"
+             else
+                docker-compose stop nginx-node node mailhog mongo
+                docker-compose rm -f
+                MEAN="Start"
+             fi;
              ;;
          6)
              docker-compose exec node bash
              ;;
          7)
-             x-terminal-emulator -e "docker-compose exec --user node node bash -c \"npm start\"" & disown
+             docker-compose exec nginx bash -c "service nginx reload"
              ;;
          8)
-             docker-compose stop node mongo redis
-             docker-compose rm -f
+             x-terminal-emulator -e "docker-compose exec --user node node bash -c \"npm start\"" & disown
              ;;
          9)
-             docker-compose ps
+             dockerps
+             echo "$status"
              ;;
          10)
              docker stop $(docker ps -a -q)
              docker-compose rm -f
+             dockerps
              ;;
          11)
-             docker-compose up -d mysql
+             if [[ "$MYSQL" != "Stop" ]]; then
+                docker-compose up -d mysql
+                MYSQL="Stop"
+             else
+                docker-compose stop mysql
+                docker-compose rm -f
+                MYSQL="Start"
+             fi;
              ;;
          12)
-             docker-compose up -d phpmyadmin
+             if [[ "$PHPMY" != "Stop" ]]; then
+                docker-compose up -d phpmyadmin
+                PHPMY="Stop"
+             else
+                docker-compose stop phpmyadmin
+                docker-compose rm -f
+                PHPMY="Start"
+             fi;
              ;;
          13)
-             docker-compose up -d mailhog
+             if [[ "$MAIL" != "Stop" ]]; then
+                docker-compose up -d mailhog
+                MAIL="Stop"
+             else
+                docker-compose stop mailhog
+                docker-compose rm -f
+                MAIL="Start"
+             fi;
              ;;
          14)
-             docker-compose up -d mongo
+             if [[ "$MONGO" != "Stop" ]]; then
+                docker-compose up -d mongo
+                MONGO="Stop"
+             else
+                docker-compose stop mongo
+                docker-compose rm -f
+                MONGO="Start"
+             fi;
              ;;
          15)
-             docker-compose up -d redis memcached beanstalkd elasticsearch
+             if [[ "$REDIS" != "Stop" ]]; then
+                docker-compose up -d redis
+                REDIS="Stop"
+             else
+                docker-compose stop redis
+                docker-compose rm -f
+                REDIS="Start"
+             fi;
              ;;
          16)
+             if [[ "$MEMCA" != "Stop" ]]; then
+                docker-compose up -d memcached
+                MEMCA="Stop"
+             else
+                docker-compose stop memcached
+                docker-compose rm -f
+                MEMCA="Start"
+             fi;
+             ;;
+         17)
+             if [[ "$ELAS" != "Stop" ]]; then
+                docker-compose up -d elasticsearch
+                ELAS="Stop"
+             else
+                docker-compose stop elasticsearch
+                docker-compose rm -f
+                ELAS="Start"
+             fi;
+             ;;
+         18)
+             if [[ "$BEANSTA" != "Stop" ]]; then
+                docker-compose up -d beanstalkd beanstalkd-console
+                BEANSTA="Stop"
+             else
+                docker-compose stop beanstalkd beanstalkd-console
+                docker-compose rm -f
+                BEANSTA="Start"
+             fi;
+             ;;
+         0)
              docker-compose stop
              docker-compose rm -f
-             docker-compose build apache2 mysql workspace php-fpm mailhog node mongo redis memcached beanstalkd elasticsearch phpmyadmin nginx nginx-node
+             docker-compose build apache2 mysql workspace php-fpm mailhog node mongo redis memcached beanstalkd beanstalkd-console elasticsearch phpmyadmin nginx nginx-node
              ;;
          q)
              exit
