@@ -15,7 +15,7 @@ while true; do
     echo "4. Php-fpm root bash"
     echo "5. Start MEAN containers"
     echo "6. Node root user"
-    echo "7. Hot reload nginx-node conf"
+    echo "7. Npm start"
     echo "8. Stop node and mongo containers"
     echo "9. Docker container list (ps)"
     echo "10. Stop all containers"
@@ -49,7 +49,7 @@ while true; do
              docker-compose exec node bash
              ;;
          7)
-             docker-compose exec nginx-node bash -c "service nginx reload"
+             x-terminal-emulator -e "docker-compose exec --user node node bash -c \"npm start\"" & disown
              ;;
          8)
              docker-compose stop node mongo redis
