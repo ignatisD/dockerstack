@@ -22,7 +22,7 @@ while true; do
     echo "11. Start Mysql container"
     echo "12. Start PhpMyAdmin container"
     echo "13. Start Mailhog container"
-    echo "14. Start php-worker container"
+    echo "14. Start Mongo container"
     echo "15. Start Redis, Memcached, Beanstalkd and Elasticsearch containers"
     echo "16. Build all containers"
     echo ""
@@ -72,7 +72,7 @@ while true; do
              docker-compose up -d mailhog
              ;;
          14)
-             docker-compose up -d php-worker
+             docker-compose up -d mongo
              ;;
          15)
              docker-compose up -d redis memcached beanstalkd elasticsearch
