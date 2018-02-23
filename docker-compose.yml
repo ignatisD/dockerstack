@@ -26,7 +26,8 @@ services:
         volumes_from:
             - applications
         extra_hosts:
-            - "dockerhost:${DOCKER_HOST_IP}"
+            - "dockerhost:${DOCKERHOST}"
+            - "localmachine:${LOCALMACHINE}"
             - "${EXTRA_HOST}:127.0.0.1"
         ports:
             - "3000"
@@ -44,29 +45,31 @@ services:
         build:
             context: ./workspace
             args:
-                - INSTALL_XDEBUG=false
-                - INSTALL_SOAP=false
-                - INSTALL_MONGO=false
-                - INSTALL_NODE=false
-                - INSTALL_YARN=false
-                - INSTALL_DRUSH=false
-                - INSTALL_AEROSPIKE_EXTENSION=false
-                - INSTALL_V8JS_EXTENSION=false
-                - COMPOSER_GLOBAL_INSTALL=true
-                - INSTALL_WORKSPACE_SSH=true
-                - INSTALL_LARAVEL_ENVOY=false
-                - INSTALL_DEPLOYER=false
-                - INSTALL_LINUXBREW=false
+                - COMPOSER_GLOBAL_INSTALL=${COMPOSER_GLOBAL_INSTALL}
+                - INSTALL_WORKSPACE_SSH=${INSTALL_WORKSPACE_SSH}
+                - INSTALL_SOAP=${INSTALL_SOAP}
+                - INSTALL_ZIP_ARCHIVE=${INSTALL_ZIP_ARCHIVE}
+                - INSTALL_BCMATH=${INSTALL_BCMATH}
+                - INSTALL_PHPREDIS=${INSTALL_PHPREDIS}
+                - INSTALL_MEMCACHED=${INSTALL_MEMCACHED}
+                - INSTALL_GETTEXT=${INSTALL_GETTEXT}
+                - INSTALL_XDEBUG=${INSTALL_XDEBUG}
+                - INSTALL_MONGO=${INSTALL_MONGO}
+                - INSTALL_IMAP=${INSTALL_IMAP}
+                - INSTALL_OPCACHE=${INSTALL_OPCACHE}
+                - INSTALL_EXIF=${INSTALL_EXIF}
+                - INSTALL_AEROSPIKE_EXTENSION=${INSTALL_AEROSPIKE_EXTENSION}
+                - CODEIGNITER=${CODEIGNITER}
                 - PUID=1000
                 - PGID=1000
-                - NODE_VERSION=stable
-                - YARN_VERSION=latest
-                - TZ=UTC
+                - TZ=${TZ}
         volumes_from:
             - applications
         extra_hosts:
             # IMPORTANT: Replace with your Docker Host IP (will be appended to /etc/hosts)
             - "dockerhost:${DOCKERHOST}"
+            - "localmachine:${LOCALMACHINE}"
+            - "${EXTRA_HOST}:127.0.0.1"
         ports:
            - "${WORKSPACE_SSH_PORT}:22"
         tty: true
@@ -82,25 +85,29 @@ services:
         build:
             context: ./php-fpm
             args:
-                - INSTALL_XDEBUG=false
-                - INSTALL_SOAP=true
-                - INSTALL_MONGO=false
-                - INSTALL_ZIP_ARCHIVE=true
-                - INSTALL_BCMATH=false
-                - INSTALL_PHPREDIS=false
-                - INSTALL_MEMCACHED=true
-                - INSTALL_OPCACHE=false
-                - INSTALL_EXIF=false
-                - INSTALL_AEROSPIKE_EXTENSION=false
+                - INSTALL_SOAP=${INSTALL_SOAP}
+                - INSTALL_ZIP_ARCHIVE=${INSTALL_ZIP_ARCHIVE}
+                - INSTALL_BCMATH=${INSTALL_BCMATH}
+                - INSTALL_PHPREDIS=${INSTALL_PHPREDIS}
+                - INSTALL_MEMCACHED=${INSTALL_MEMCACHED}
+                - INSTALL_GETTEXT=${INSTALL_GETTEXT}
+                - INSTALL_XDEBUG=${INSTALL_XDEBUG}
+                - INSTALL_MONGO=${INSTALL_MONGO}
+                - INSTALL_IMAP=${INSTALL_IMAP}
+                - INSTALL_OPCACHE=${INSTALL_OPCACHE}
+                - INSTALL_EXIF=${INSTALL_EXIF}
+                - INSTALL_AEROSPIKE_EXTENSION=${INSTALL_AEROSPIKE_EXTENSION}
                 - CODEIGNITER=false
             dockerfile: Dockerfile-${PHP_VERSION}
         volumes_from:
             - applications
         ports:
-            - "9000"
+            - "${PHP_FPM}:9000"
         extra_hosts:
             # IMPORTANT: Replace with your Docker Host IP (will be appended to /etc/hosts)
             - "dockerhost:${DOCKERHOST}"
+            - "localmachine:${LOCALMACHINE}"
+            - "${EXTRA_HOST}:127.0.0.1"
         environment:
             # IMPORTANT: Set the Remote Interpreter entry matching name to `laravel`
             - PHP_IDE_CONFIG=serverName=laravel
@@ -118,7 +125,7 @@ services:
         volumes_from:
             - applications
         volumes:
-            - ${DATA_SAVE_PATH}/logs/nginx/:/var/log/nginx
+            - nginx:/var/log/nginx
             - ./nginx/sites/:/etc/nginx/sites-available
             - ./nginx/conf.d/:/etc/nginx/conf.d
         ports:
@@ -140,7 +147,7 @@ services:
         volumes_from:
             - applications
         volumes:
-            - ${DATA_SAVE_PATH}/logs/nginx-node/:/var/log/nginx
+            - nginx:/var/log/nginx
             - ./nginx/sites-node/:/etc/nginx/sites-available
             - ./nginx/conf.d-node/:/etc/nginx/conf.d
         ports:
@@ -160,11 +167,11 @@ services:
         build:
             context: ./apache2
             args:
-                - PHP_SOCKET=php-fpm:${PHP_FPM}
+                - PHP_SOCKET=php-fpm:9000
         volumes_from:
             - applications
         volumes:
-            - ${DATA_SAVE_PATH}/logs/apache2:/var/log/apache2
+            - apache2:/var/log/apache2
         ports:
             - "80"
             - "443"
@@ -188,7 +195,7 @@ services:
                 - MYSQL_PASSWORD=${DB_PASS}
                 - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASS}
         volumes:
-            - mysql:/var/lib/mysql
+            - ${DATA_SAVE_PATH}/mysql:/var/lib/mysql
         ports:
             - "${DB_PORT}:3306"
 
@@ -202,7 +209,7 @@ services:
         dns_search: '' #fix for windows dns resolve.conf
         build: ./mariadb
         volumes:
-            - mariadb:/var/lib/mysql
+            - ${DATA_SAVE_PATH}/mariadb:/var/lib/mysql
         ports:
             - "${DB_PORT}:3306"
         environment:
@@ -237,8 +244,9 @@ services:
         ports:
             - "${MONGODB_PORT}:27017"
         volumes:
-            - ${DATA_SAVE_PATH}/mongo:/data/db
-        command:
+            - ${MONGODB_SAVE_PATH}:/data/db
+            - mongo:/var/log/mongodb/
+        entrypoint:
             - "mongod"
         # The first time comment out the auth section to setup a user
         # Afterwards enable the auth section for security
@@ -323,7 +331,6 @@ services:
         ports:
             - "${PHPMYADMIN_PORT}:80"
         links:
-            # for mysql container
             - "${DB_HOST}:db"
 
 ### ElasticSearch Container #################################
@@ -347,17 +354,15 @@ services:
 ### Volumes Setup ###########################################
 
 volumes:
-    mysql:
+    apache2:
+        driver: "local"
+    nginx:
         driver: "local"
     memcached:
         driver: "local"
     redis:
         driver: "local"
-    mariadb:
-        driver: "local"
     mongo:
-        driver: "local"
-    phpmyadmin:
         driver: "local"
     elasticsearch-data:
         driver: "local"

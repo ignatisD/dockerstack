@@ -1,14 +1,23 @@
+FROM php:7.0
+
+MAINTAINER Ignatios Drakoulas <ignatios@drakoulas.gr>
+
 #
 #--------------------------------------------------------------------------
-# Image Setup
+# Software's Installation
 #--------------------------------------------------------------------------
 #
-FROM phusion/baseimage:latest
+#
+#--------------------------------------------------------------------------
+# Mandatory Software's Installation
+#--------------------------------------------------------------------------
+#
+#
+# Install "PHP Extentions", "libraries", "Software's"
 
-MAINTAINER Mahmoud Zalt <mahmoud@zalt.me>
-
-RUN DEBIAN_FRONTEND=noninteractive
-RUN locale-gen en_US.UTF-8
+RUN apt-get update && apt-get install -y locales \
+	&& localedef -i el_GR -c -f UTF-8 -A /usr/share/locale/locale.alias el_GR.UTF-8 \
+	&& localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 
 ENV LANGUAGE=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
@@ -16,37 +25,8 @@ ENV LC_CTYPE=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 ENV TERM xterm
 
-# Add the "PHP 7" ppa
-RUN apt-get install -y software-properties-common && \
-    add-apt-repository -y ppa:ondrej/php
-
-#
-#--------------------------------------------------------------------------
-# Software's Installation
-#--------------------------------------------------------------------------
-#
-
-# Install "PHP Extentions", "libraries", "Software's"
-RUN apt-get update && \
-    apt-get install -y --allow-downgrades --allow-remove-essential \
-        --allow-change-held-packages \
-        php7.0-cli \
-        php7.0-common \
-        php7.0-curl \
-        php7.0-intl \
-        php7.0-json \
-        php7.0-xml \
-        php7.0-mbstring \
-        php7.0-mcrypt \
-        php7.0-mysql \
-        php7.0-pgsql \
-        php7.0-sqlite \
-        php7.0-sqlite3 \
-        php7.0-zip \
-        php7.0-bcmath \
-        php7.0-memcached \
-        php7.0-gd \
-        php7.0-dev \
+RUN apt-get install -y \
+        software-properties-common \
         pkg-config \
         libcurl4-openssl-dev \
         libedit-dev \
@@ -54,13 +34,35 @@ RUN apt-get update && \
         libxml2-dev \
         xz-utils \
         libsqlite3-dev \
+        libmemcached-dev \
+        libz-dev \
+        libpq-dev \
+        libjpeg-dev \
+        libpng12-dev \
+        libfreetype6-dev \
+        libssl-dev \
+        libmcrypt-dev \
         sqlite3 \
         git \
         curl \
-        vim \
         nano \
         postgresql-client \
+        mysql-client \
+        htop \
+        poppler-utils \
     && apt-get clean
+
+# Install the PHP mcrypt extention
+RUN docker-php-ext-install mcrypt
+
+# Install the PHP pdo_mysql extention
+RUN docker-php-ext-install pdo_mysql
+
+# Install the PHP pdo_pgsql extention
+RUN docker-php-ext-install pdo_pgsql
+
+# Install the PHP mysqli extention
+RUN docker-php-ext-install mysqli
 
 #####################################
 # Composer:
@@ -74,28 +76,6 @@ RUN curl -s http://getcomposer.org/installer | php && \
 # Source the bash
 RUN . ~/.bashrc
 
-#
-#--------------------------------------------------------------------------
-# Mandatory Software's Installation
-#--------------------------------------------------------------------------
-#
-# Mandatory Software's such as ("php7.0-cli", "git", "vim", ....) are
-# installed on the base image 'laradock/workspace' image. If you want
-# to add more Software's or remove existing one, you need to edit the
-# base image (https://github.com/LaraDock/workspace).
-#
-
-#
-#--------------------------------------------------------------------------
-# Optional Software's Installation
-#--------------------------------------------------------------------------
-#
-# Optional Software's will only be installed if you set them to `true`
-# in the `docker-compose.yml` before the build.
-# Example:
-#   - INSTALL_NODE=false
-#   - ...
-#
 
 #####################################
 # Non-Root User:
@@ -104,25 +84,11 @@ RUN . ~/.bashrc
 # Add a non-root user to prevent files being created with root permissions on host machine.
 ARG PUID=1000
 ARG PGID=1000
-RUN groupadd -g $PGID laradock && \
-    useradd -u $PUID -g laradock -m laradock
+ARG WORKSPACE_USER=1000
+ENV WORKSPACE_USER ${WORKSPACE_USER}
 
-
-#####################################
-# SOAP:
-#####################################
-USER root
-
-ARG INSTALL_SOAP=false
-ENV INSTALL_SOAP ${INSTALL_SOAP}
-
-RUN if [ ${INSTALL_SOAP} = true ]; then \
-  # Install the PHP SOAP extension
-  apt-get -y update && \
-  add-apt-repository -y ppa:ondrej/php && \
-  apt-get -y install libxml2-dev php7.0-soap && \
-  echo "extension=soap.so" >> /etc/php/7.0/cli/conf.d/40-soap.ini \
-;fi
+RUN groupadd -g $PGID $WORKSPACE_USER && \
+    useradd -u $PUID -g $WORKSPACE_USER -m $WORKSPACE_USER
 
 #####################################
 # Set Timezone
@@ -137,11 +103,11 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 #####################################
 
 # Add the composer.json
-COPY ./composer.json /home/laradock/.composer/composer.json
+COPY ./composer.json /home/${WORKSPACE_USER}/.composer/composer.json
 
-# Make sure that ~/.composer belongs to laradock
-RUN chown -R laradock:laradock /home/laradock/.composer
-USER laradock
+# Make sure that ~/.composer belongs to ${WORKSPACE_USER}
+RUN chown -R $WORKSPACE_USER:$WORKSPACE_USER /home/$WORKSPACE_USER/.composer
+USER $WORKSPACE_USER
 
 # Check if global install need to be ran
 ARG COMPOSER_GLOBAL_INSTALL=false
@@ -167,36 +133,52 @@ RUN chmod -R 644 /etc/cron.d
 # User Aliases
 #####################################
 
-USER laradock
-COPY ./aliases.sh /home/laradock/aliases.sh
+USER ${WORKSPACE_USER}
+COPY ./aliases.sh /home/$WORKSPACE_USER/aliases.sh
 RUN echo "" >> ~/.bashrc && \
     echo "# Load Custom Aliases" >> ~/.bashrc && \
-    echo "source /home/laradock/aliases.sh" >> ~/.bashrc && \
+    echo "source /home/${WORKSPACE_USER}/aliases.sh" >> ~/.bashrc && \
     echo "" >> ~/.bashrc
     
 USER root
 RUN echo "" >> ~/.bashrc && \
     echo "# Load Custom Aliases" >> ~/.bashrc && \
-    echo "source /home/laradock/aliases.sh" >> ~/.bashrc && \
+    echo "source /home/${WORKSPACE_USER}/aliases.sh" >> ~/.bashrc && \
     echo "" >> ~/.bashrc
 
 #####################################
-# xDebug:
+# Laravel Artisan Alias
 #####################################
+USER root
 
-ARG INSTALL_XDEBUG=false
-RUN if [ ${INSTALL_XDEBUG} = true ]; then \
-    # Load the xdebug extension only with phpunit commands
-    apt-get update && \
-    apt-get install -y --force-yes php7.0-xdebug && \
-    sed -i 's/^/;/g' /etc/php/7.0/cli/conf.d/20-xdebug.ini && \
-    echo "alias phpunit='php -dzend_extension=xdebug.so /var/www/vendor/bin/phpunit'" >> ~/.bashrc \
-;fi
-# ADD for REMOTE debugging
-COPY ./xdebug.ini /etc/php/7.0/cli/conf.d/xdebug.ini
+RUN echo "" >> ~/.bashrc && \
+    echo 'alias art="php artisan"' >> ~/.bashrc
 
 #####################################
-# ssh:
+# Non-root user : PHPUnit path
+#####################################
+
+# add ./vendor/bin to non-root user's bashrc (needed for phpunit)
+USER $WORKSPACE_USER
+
+RUN echo "" >> ~/.bashrc && \
+    echo 'export PATH="/var/www/vendor/bin:$PATH"' >> ~/.bashrc
+
+
+#
+#--------------------------------------------------------------------------
+# Optional Software's Installation
+#--------------------------------------------------------------------------
+#
+# Optional Software's will only be installed if you set them to `true`
+# in the `.env` before the build.
+# Example:
+#   INSTALL_BCMATH=false
+#
+
+USER root
+#####################################
+# SSH
 #####################################
 ARG INSTALL_WORKSPACE_SSH=false
 ENV INSTALL_WORKSPACE_SSH ${INSTALL_WORKSPACE_SSH}
@@ -206,6 +188,7 @@ ADD insecure_id_rsa.pub /tmp/id_rsa.pub
 
 RUN if [ ${INSTALL_WORKSPACE_SSH} = true ]; then \
     rm -f /etc/service/sshd/down && \
+    mkdir /root/.ssh && \
     cat /tmp/id_rsa.pub >> /root/.ssh/authorized_keys \
         && cat /tmp/id_rsa.pub >> /root/.ssh/id_rsa.pub \
         && cat /tmp/id_rsa >> /root/.ssh/id_rsa \
@@ -215,106 +198,53 @@ RUN if [ ${INSTALL_WORKSPACE_SSH} = true ]; then \
 ;fi
 
 #####################################
+# SOAP:
+#####################################
+
+ARG INSTALL_SOAP=false
+ENV INSTALL_SOAP ${INSTALL_SOAP}
+
+RUN if [ ${INSTALL_SOAP} = true ]; then \
+  # Install the PHP SOAP extension
+  docker-php-ext-install soap \
+;fi
+
+
+#####################################
+# xDebug:
+#####################################
+
+ARG INSTALL_XDEBUG=false
+ENV INSTALL_XDEBUG ${INSTALL_XDEBUG}
+
+RUN if [ ${INSTALL_XDEBUG} = true ]; then \
+    pecl install -o -f xdebug && \
+    rm -rf /tmp/pear && \
+    docker-php-ext-enable xdebug && \
+    echo "alias phpunit='php -dzend_extension=xdebug.so /var/www/vendor/bin/phpunit'" >> ~/.bashrc \
+;fi
+# ADD for REMOTE debugging
+COPY ./xdebug.ini /etc/php/7.0/cli/conf.d/xdebug.ini
+
+
+#####################################
 # MongoDB:
 #####################################
 
 # Check if Mongo needs to be installed
 ARG INSTALL_MONGO=false
 ENV INSTALL_MONGO ${INSTALL_MONGO}
+
 RUN if [ ${INSTALL_MONGO} = true ]; then \
     # Install the mongodb extension
     pecl install mongodb && \
-    echo "extension=mongodb.so" >> /etc/php/7.0/cli/conf.d/30-mongodb.ini \
-;fi
-
-#####################################
-# Drush:
-#####################################
-USER root
-ENV DRUSH_VERSION 8.1.2
-ARG INSTALL_DRUSH=false
-ENV INSTALL_DRUSH ${INSTALL_DRUSH}
-RUN if [ ${INSTALL_DRUSH} = true ]; then \
-    # Install Drush 8 with the phar file.
-    curl -fsSL -o /usr/local/bin/drush https://github.com/drush-ops/drush/releases/download/$DRUSH_VERSION/drush.phar | bash && \
-    chmod +x /usr/local/bin/drush && \
-    drush core-status \
-;fi
-
-USER laradock
-
-#####################################
-# Node / NVM:
-#####################################
-
-# Check if NVM needs to be installed
-ARG NODE_VERSION=stable
-ENV NODE_VERSION ${NODE_VERSION}
-ARG INSTALL_NODE=false
-ENV INSTALL_NODE ${INSTALL_NODE}
-ENV NVM_DIR /home/laradock/.nvm
-RUN if [ ${INSTALL_NODE} = true ]; then \
-    # Install nvm (A Node Version Manager)
-    curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.6/install.sh | bash && \
-        . $NVM_DIR/nvm.sh && \
-        nvm install ${NODE_VERSION} && \
-        nvm use ${NODE_VERSION} && \
-        nvm alias ${NODE_VERSION} && \
-        npm install -g gulp bower vue-cli \
-;fi
-
-# Wouldn't execute when added to the RUN statement in the above block
-# Source NVM when loading bash since ~/.profile isn't loaded on non-login shell
-RUN if [ ${INSTALL_NODE} = true ]; then \
-    echo "" >> ~/.bashrc && \
-    echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc && \
-    echo '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm' >> ~/.bashrc \
-;fi
-
-# Add NVM binaries to root's .bashrc
-USER root
-
-RUN if [ ${INSTALL_NODE} = true ]; then \
-    echo "" >> ~/.bashrc && \
-    echo 'export NVM_DIR="/home/laradock/.nvm"' >> ~/.bashrc && \
-    echo '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm' >> ~/.bashrc \
-;fi
-
-#####################################
-# YARN:
-#####################################
-
-USER laradock
-
-ARG INSTALL_YARN=false
-ENV INSTALL_YARN ${INSTALL_YARN}
-ARG YARN_VERSION=latest
-ENV YARN_VERSION ${YARN_VERSION}
-
-RUN if [ ${INSTALL_YARN} = true ]; then \
-    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && \
-    if [ ${YARN_VERSION} = "latest" ]; then \
-        curl -o- -L https://yarnpkg.com/install.sh | bash; \
-    else \
-        curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION}; \
-    fi && \
-    echo "" >> ~/.bashrc && \
-    echo 'export PATH="$HOME/.yarn/bin:$PATH"' >> ~/.bashrc \
-;fi
-
-# Add YARN binaries to root's .bashrc
-USER root
-
-RUN if [ ${INSTALL_YARN} = true ]; then \
-    echo "" >> ~/.bashrc && \
-    echo 'export YARN_DIR="/home/laradock/.yarn"' >> ~/.bashrc && \
-    echo 'export PATH="$YARN_DIR/bin:$PATH"' >> ~/.bashrc \
+    rm -rf /tmp/pear && \
+    docker-php-ext-enable mongodb \
 ;fi
 
 #####################################
 # PHP Aerospike:
 #####################################
-USER root
 
 ARG INSTALL_AEROSPIKE_EXTENSION=true
 ENV INSTALL_AEROSPIKE_EXTENSION ${INSTALL_AEROSPIKE_EXTENSION}
@@ -340,98 +270,127 @@ RUN if [ ${INSTALL_AEROSPIKE_EXTENSION} = false ]; then \
     rm /etc/php/7.0/cli/conf.d/aerospike.ini \
 ;fi
 
-#####################################
-# PHP V8JS:
-#####################################
-USER root
 
-ARG INSTALL_V8JS_EXTENSION=false
-ENV INSTALL_V8JS_EXTENSION ${INSTALL_V8JS_EXTENSION}
 
-RUN if [ ${INSTALL_V8JS_EXTENSION} = true ]; then \
-    # Install the php V8JS extension
-    add-apt-repository -y ppa:pinepain/libv8-5.4 \
-    && apt-get update \
-    && apt-get install -y php-dev php-pear libv8-5.4 \
-    && pecl install v8js \
-    && echo "extension=v8js.so" >> /etc/php/7.0/cli/php.ini \
+#####################################
+# ZipArchive:
+#####################################
+
+ARG INSTALL_ZIP_ARCHIVE=false
+ENV INSTALL_ZIP_ARCHIVE ${INSTALL_ZIP_ARCHIVE}
+RUN if [ ${INSTALL_ZIP_ARCHIVE} = true ]; then \
+    # Install the zip extension
+    docker-php-ext-install zip \
 ;fi
 
 #####################################
-# Non-root user : PHPUnit path
+# bcmath:
 #####################################
 
-# add ./vendor/bin to non-root user's bashrc (needed for phpunit)
-USER laradock
+ARG INSTALL_BCMATH=false
+ENV INSTALL_BCMATH ${INSTALL_BCMATH}
 
-RUN echo "" >> ~/.bashrc && \
-    echo 'export PATH="/var/www/vendor/bin:$PATH"' >> ~/.bashrc
-
-#####################################
-# Laravel Artisan Alias
-#####################################
-USER root
-
-RUN echo "" >> ~/.bashrc && \
-    echo 'alias art="php artisan"' >> ~/.bashrc
-
-#####################################
-# Laravel Envoy:
-#####################################
-USER laradock
-
-ARG INSTALL_LARAVEL_ENVOY=true
-ENV INSTALL_LARAVEL_ENVOY ${INSTALL_LARAVEL_ENVOY}
-
-RUN if [ ${INSTALL_LARAVEL_ENVOY} = true ]; then \
-    # Install the Laravel Envoy
-    composer global require "laravel/envoy=~1.0" \
+RUN if [ ${INSTALL_BCMATH} = true ]; then \
+    # Install the bcmath extension
+    docker-php-ext-install bcmath \
 ;fi
 
 #####################################
-# Deployer:
+# PHP Memcached:
 #####################################
-USER laradock
 
-ARG INSTALL_DEPLOYER=false
-ENV INSTALL_DEPLOYER ${INSTALL_DEPLOYER}
+ARG INSTALL_MEMCACHED=false
+ENV INSTALL_MEMCACHED ${INSTALL_MEMCACHED}
 
-RUN if [ ${INSTALL_DEPLOYER} = true ]; then \
-    # Install the Deployer
-    composer global require "deployer/deployer" \
+RUN if [ ${INSTALL_MEMCACHED} = true ]; then \
+    # Install the php memcached extension
+    # Remember that php5.6 needs memcached-2.2.0
+    pecl install memcached && \
+    rm -rf /tmp/pear && \
+    docker-php-ext-enable memcached \
 ;fi
 
 #####################################
-# Linuxbrew:
+# PHP REDIS EXTENSION FOR PHP 7.0
 #####################################
-USER root
 
-ARG INSTALL_LINUXBREW=true
-ENV INSTALL_LINUXBREW ${INSTALL_LINUXBREW}
+ARG INSTALL_PHPREDIS=false
+ENV INSTALL_PHPREDIS ${INSTALL_PHPREDIS}
 
-RUN if [ ${INSTALL_LINUXBREW} = true ]; then \
+RUN if [ ${INSTALL_PHPREDIS} = true ]; then \
+    # Install Php Redis Extension
+    pecl install -o -f redis && \
+    rm -rf /tmp/pear && \
+    docker-php-ext-enable redis \
+;fi
 
-    # Preparation
-    apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y build-essential make cmake scons curl git \
-      ruby autoconf automake autoconf-archive \
-      gettext libtool flex bison \
-      libbz2-dev libcurl4-openssl-dev \
-      libexpat-dev libncurses-dev && \
+#####################################
+# IMAP:
+#####################################
 
-    # Install the Linuxbrew
-    git clone https://github.com/Homebrew/linuxbrew.git ~/.linuxbrew && \
+ARG INSTALL_IMAP=false
+ENV INSTALL_IMAP ${INSTALL_IMAP}
 
-    echo "" >> ~/.bashrc && \
-    echo 'export PKG_CONFIG_PATH"=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig:/usr/lib64/pkgconfig:/usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib64/pkgconfig:/usr/share/pkgconfig:$PKG_CONFIG_PATH"' >> ~/.bashrc && \
+RUN if [ ${INSTALL_IMAP} = true ]; then \
+ # Install the PHP IMAP extension
+    apt-get -y update  && \
+    apt-get install -y libc-client-dev libkrb5-dev && \
+    docker-php-ext-configure imap --with-kerberos --with-imap-ssl && \
+    docker-php-ext-install imap \
+;fi
 
-    # Setup linuxbrew
-    echo 'export LINUXBREWHOME="$HOME/.linuxbrew"' >> ~/.bashrc && \
-    echo 'export PATH="$LINUXBREWHOME/bin:$PATH"' >> ~/.bashrc && \
-    echo 'export MANPATH="$LINUXBREWHOME/man:$MANPATH"' >> ~/.bashrc && \
-    echo 'export PKG_CONFIG_PATH="$LINUXBREWHOME/lib64/pkgconfig:$LINUXBREWHOME/lib/pkgconfig:$PKG_CONFIG_PATH"' >> ~/.bashrc && \
-    echo 'export LD_LIBRARY_PATH="$LINUXBREWHOME/lib64:$LINUXBREWHOME/lib:$LD_LIBRARY_PATH"' >> ~/.bashrc \
+#####################################
+# Opcache:
+#####################################
+
+ARG INSTALL_OPCACHE=false
+ENV INSTALL_OPCACHE ${INSTALL_OPCACHE}
+
+RUN if [ ${INSTALL_OPCACHE} = true ]; then \
+    docker-php-ext-install opcache \
+;fi
+
+# Copy opcache configration
+COPY ./opcache.ini /etc/php/7.0/cli/conf.d/opcache.ini
+
+RUN if [ ${INSTALL_OPCACHE} = false ]; then \
+    rm /etc/php/7.0/cli/conf.d/opcache.ini \
+;fi
+
+#####################################
+# GETTEXT:
+#####################################
+
+ARG INSTALL_GETTEXT=false
+ENV INSTALL_GETTEXT ${INSTALL_GETTEXT}
+
+RUN if [ ${INSTALL_GETTEXT} = true ]; then \
+    docker-php-ext-install gettext \
+;fi
+
+
+#####################################
+# Exif:
+#####################################
+
+ARG INSTALL_EXIF=false
+ENV INSTALL_EXIF ${INSTALL_EXIF}
+
+RUN if [ ${INSTALL_EXIF} = true ]; then \
+    # Enable Exif PHP extentions requirements
+    docker-php-ext-install exif \
+;fi
+
+#####################################
+# Codeigniter Modifications:
+#####################################
+
+ARG CODEIGNITER=false
+ENV CODEIGNITER ${CODEIGNITER}
+
+RUN if [ ${CODEIGNITER} = true ]; then \
+    # Install Codeigniter PHP extentions requirements
+     docker-php-ext-install tokenizer \
 ;fi
 
 #
@@ -442,12 +401,10 @@ RUN if [ ${INSTALL_LINUXBREW} = true ]; then \
 
 USER root
 
-# Installing mysql client to run mysql commands
-RUN apt-get update && \
-    apt-get upgrade -y && apt-get install -y mysql-client htop
-
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN php -m
 
 # Set default work directory
 WORKDIR /var/www
