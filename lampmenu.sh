@@ -61,10 +61,14 @@ while true; do
             if [[ "$LAMP" != "Stop" ]]; then
                 docker-compose up -d mysql workspace php-fpm apache2 mailhog nginx
                 LAMP="Stop"
+                MAIL="Stop"
+                MYSQL="Stop"
             else
                 docker-compose stop nginx apache2 workspace php-fpm mailhog mysql
                 docker-compose rm -f
                 LAMP="Start"
+                MAIL="Start"
+                MYSQL="Start"
             fi;
             ;;
          2)
@@ -80,10 +84,14 @@ while true; do
              if [[ "$MEAN" != "Stop" ]]; then
                 docker-compose up -d node mongo mailhog nginx-node
                 MEAN="Stop"
+                MAIL="Stop"
+                MONGO="Stop"
              else
                 docker-compose stop nginx-node node mailhog mongo
                 docker-compose rm -f
                 MEAN="Start"
+                MAIL="Start"
+                MONGO="Start"
              fi;
              ;;
          6)
