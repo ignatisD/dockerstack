@@ -196,6 +196,7 @@ while true; do
              docker-compose stop
              docker-compose rm -f
              docker-compose build apache2 mysql workspace php-fpm mailhog node mongo redis memcached beanstalkd beanstalkd-console elasticsearch phpmyadmin nginx nginx-node
+             dockerps
              ;;
          q)
              exit
