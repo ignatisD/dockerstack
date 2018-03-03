@@ -36,7 +36,7 @@ by editing the `APPLICATIONS` variable.
  
 ```bash
 cd lamp_stack
-cp env_example .env
+cp .env.example .env
 ```
 
 ### 4. Open the Menu
