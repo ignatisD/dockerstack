@@ -72,6 +72,7 @@ services:
             - "${EXTRA_HOST}:127.0.0.1"
         ports:
            - "${WORKSPACE_SSH_PORT}:22"
+           - "7777:7777"
         tty: true
 
 ### PHP-FPM Container #######################################
