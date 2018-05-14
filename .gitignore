@@ -4,3 +4,11 @@ _guides
 /data
 /*.sql
 .env
+
+ssl/*.pem
+!ssl/ca*.pem
+
+
+
+!.gitignore
+!.gitkeep

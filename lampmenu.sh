@@ -2,6 +2,10 @@
 if [ ! -f ".env" ]; then
     cp .env.example .env
 fi;
+if [ ! -f "ssl/server.crt.pem" ] || [ ! -f "ssl/server.key.pem" ]; then
+    cp ssl/default/server.crt.pem ssl/server.crt.pem
+    cp ssl/default/server.key.pem ssl/server.key.pem
+fi;
 function check()
 {
     result=$(echo "$1" | grep "$2" | sed -n -r 's/lampstack_[a-zA-Z0-9\-]*_[0-9].*(Up).*/\1/p')
