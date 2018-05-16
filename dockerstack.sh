@@ -8,7 +8,7 @@ if [ ! -f "ssl/server.crt.pem" ] || [ ! -f "ssl/server.key.pem" ]; then
 fi;
 function check()
 {
-    result=$(echo "$1" | grep "$2" | sed -n -r 's/lampstack_[a-zA-Z0-9\-]*_[0-9].*(Up).*/\1/p')
+    result=$(echo "$1" | grep "$2" | sed -n -r 's/dockerstack_[a-zA-Z0-9\-]*_[0-9].*(Up).*/\1/p')
     if [[ "$result" != "Up" ]]; then
         echo "Start";
     else
