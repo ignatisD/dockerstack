@@ -46,7 +46,7 @@ chmod +x lampmenu.sh
 ``` 
 ![Lamp menu preview](icons/dockerstackmenu.png?raw=true "LAMP & MEAN stack menu preview")
 
-- Then choose number 16 to build the containers (this will initially take a lot of time)
+- Then choose number `0` to build the containers (this will initially take a lot of time)
 - LAMP stack containers are: 
     - `apache2`
     - `mysql` 
