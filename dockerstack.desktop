@@ -2,7 +2,7 @@
 Version=1.0
 Type=Application
 Terminal=true
-Icon=~/projects/dockerstack/icons/lamp.png
+Icon=/full/path/to/dockerstack/icons/lamp.png
 Name=Lamp Stack Menu
-Exec=bash -c "cd ~/projects/dockerstack && ./dockerstack.sh"
+Exec=bash -c "cd ~/full/path/to/dockerstack && ./dockerstack.sh"
 Comment=Opens Lamp Stack menu script
