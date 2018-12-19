@@ -55,6 +55,8 @@ while true; do
     echo "16. $MEMCA Memcached container"
     echo "17. $ELAS Elasticsearch container"
     echo "18. $BEANSTA Beanstalkd and Beanstalkd console containers"
+    echo "19. composer install"
+    echo "20. composer dump-autoload"
     echo "0. Build all containers"
     echo ""
     echo -n "Select a number or type a command: "
@@ -194,6 +196,16 @@ while true; do
                 docker-compose stop beanstalkd beanstalkd-console
                 docker-compose rm -f
                 BEANSTA="Start"
+             fi;
+             ;;
+         19)
+             if [[ "$LAMP" != "Start" ]]; then
+                docker-compose exec -u 1000 workspace bash -c 'composer install'
+             fi;
+             ;;
+         20)
+             if [[ "$LAMP" != "Start" ]]; then
+                docker-compose exec -u 1000 workspace bash -c 'composer dump-autoload'
              fi;
              ;;
          0)
