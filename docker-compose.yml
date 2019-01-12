@@ -63,6 +63,7 @@ services:
                 - PUID=1000
                 - PGID=1000
                 - TZ=${TZ}
+            dockerfile: ${PHP_WORKSPACE_FILE}
         volumes_from:
             - applications
         extra_hosts:
