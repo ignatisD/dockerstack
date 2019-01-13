@@ -41,8 +41,8 @@ cp .env.example .env
 ### 4. Open the Menu
 
 ```bash
-chmod +x lampmenu.sh
-./lampmenu.sh
+chmod +x dockerstack.sh
+./dockerstack.sh
 ``` 
 ![Lamp menu preview](icons/dockerstackmenu.png?raw=true "LAMP & MEAN stack menu preview")
 
@@ -50,8 +50,8 @@ chmod +x lampmenu.sh
 - LAMP stack containers are: 
     - `apache2`
     - `mysql` 
-    - `workspace` 
-    - `php-fpm` 
+    - `workspace` (php 7.0 / 7.3)
+    - `php-fpm`  (php 5.6 / 7.0 / 7.2 / 7.3)
     - `mailhog`
 - MEAN stack containers are:
     - `node`
