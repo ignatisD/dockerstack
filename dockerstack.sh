@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-if [ ! -f ".env" ]; then
+if [[ ! -f ".env" ]]; then
     cp .env.example .env
 fi;
-if [ ! -f "ssl/server.crt.pem" ] || [ ! -f "ssl/server.key.pem" ]; then
-    cp ssl/default/server.crt.pem ssl/server.crt.pem
-    cp ssl/default/server.key.pem ssl/server.key.pem
+if [[ ! -f "ssl/server.crt.pem" ]] || [[ ! -f "ssl/server.key.pem" ]]; then
+    ln -s ssl/default/server.bundle.pem ssl/server.bundle.pem
+    ln -s ssl/default/server.crt.pem ssl/server.crt.pem
+    ln -s ssl/default/server.key.pem ssl/server.key.pem
 fi;
 function check()
 {
