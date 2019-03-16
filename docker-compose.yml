@@ -122,14 +122,14 @@ services:
           - "8.8.8.8"
           - "8.8.4.4"
         dns_search: '' #fix for windows dns resolve.conf
-        build:
-            context: ./nginx
+        image: nginx:1.14
         volumes_from:
             - applications
         volumes:
             - nginx:/var/log/nginx
-            - ./nginx/sites/:/etc/nginx/sites-available
+            - ./nginx/sites-enabled/:/etc/nginx/sites-enabled
             - ./nginx/conf.d/:/etc/nginx/conf.d
+            - ./nginx/nginx.conf/:/etc/nginx/nginx.conf
         ports:
             - "${HTTP_PORT}:80"
             - "${HTTPS_PORT}:443"
@@ -144,14 +144,14 @@ services:
           - "8.8.8.8"
           - "8.8.4.4"
         dns_search: '' #fix for windows dns resolve.conf
-        build:
-            context: ./nginx
+        image: nginx:1.14
         volumes_from:
             - applications
         volumes:
             - nginx:/var/log/nginx
-            - ./nginx/sites-node/:/etc/nginx/sites-available
+            - ./nginx/sites-enabled-node/:/etc/nginx/sites-enabled
             - ./nginx/conf.d-node/:/etc/nginx/conf.d
+            - ./nginx/nginx.conf/:/etc/nginx/nginx.conf
         ports:
             - "${HTTP_PORT}:80"
             - "${HTTPS_PORT}:443"
@@ -341,7 +341,9 @@ services:
           - "8.8.8.8"
           - "8.8.4.4"
         dns_search: '' #fix for windows dns resolve.conf
-        build: ./phpmyadmin
+        image: phpmyadmin/phpmyadmin
+        volumes:
+          - sessions:/sessions
         environment:
             PMA_ARBITRARY: 1
             MYSQL_USER: ${DB_USER}
