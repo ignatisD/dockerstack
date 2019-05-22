@@ -363,7 +363,7 @@ services:
         build: ./elasticsearch
         volumes:
             - elasticsearch-data:/usr/share/elasticsearch/data
-            - elasticsearch-plugins:/usr/share/elasticsearch/data
+            - elasticsearch-plugins:/usr/share/elasticsearch/plugins
         ports:
             - "${ELASTICSEARCH_PORT}:9200"
             - "9300:9300"
