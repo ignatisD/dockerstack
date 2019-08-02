@@ -42,6 +42,7 @@ services:
           - "8.8.8.8"
           - "8.8.4.4"
         dns_search: '' #fix for windows dns resolve.conf
+        image: ignatisd/workspace:${WORKSPACE_PHP_VERSION}
         build:
             context: ./workspace
             args:
@@ -63,7 +64,7 @@ services:
                 - PUID=1000
                 - PGID=1000
                 - TZ=${TZ}
-            dockerfile: ${PHP_WORKSPACE_FILE}
+            dockerfile: Dockerfile-${WORKSPACE_PHP_VERSION}
         volumes_from:
             - applications
         extra_hosts:
@@ -84,6 +85,7 @@ services:
           - "8.8.8.8"
           - "8.8.4.4"
         dns_search: '' #fix for windows dns resolve.conf
+        image: ignatisd/php-fpm:${PHP_VERSION}
         build:
             context: ./php-fpm
             args:
@@ -166,6 +168,7 @@ services:
           - "8.8.8.8"
           - "8.8.4.4"
         dns_search: '' #fix for windows dns resolve.conf
+        image: ignatisd/apache2
         build:
             context: ./apache2
             args:
@@ -189,15 +192,15 @@ services:
           - "8.8.8.8"
           - "8.8.4.4"
         dns_search: '' #fix for windows dns resolve.conf
-        build:
-            context: ./mysql
-            args:
-                - MYSQL_DATABASE=${DB_NAME}
-                - MYSQL_USER=${DB_USER}
-                - MYSQL_PASSWORD=${DB_PASS}
-                - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASS}
+        image: mysql:5.7
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
+            MYSQL_DATABASE: ${DB_NAME}
+            MYSQL_USER: ${DB_USER}
+            MYSQL_PASSWORD: ${DB_PASS}
         volumes:
             - ${DATA_SAVE_PATH}/mysql:/var/lib/mysql
+            - ./mysql/conf.d/:/etc/mysql/conf.d/
         ports:
             - "${DB_PORT}:3306"
 
@@ -246,7 +249,7 @@ services:
         - "8.8.8.8"
         - "8.8.4.4"
       dns_search: '' #fix for windows dns resolve.conf
-      build: ./mailhog
+      image: mailhog/mailhog
       ports:
         - "1025:1025"
         - "8025:8025"
@@ -280,7 +283,7 @@ services:
           - "8.8.8.8"
           - "8.8.4.4"
         dns_search: '' #fix for windows dns resolve.conf
-        build: ./redis
+        image: redis:4
         volumes:
             - redis:/data
         ports:
@@ -360,15 +363,22 @@ services:
           - "8.8.8.8"
           - "8.8.4.4"
         dns_search: '' #fix for windows dns resolve.conf
-        build: ./elasticsearch
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.2.0
+        environment:
+            - "network.host=0.0.0.0"
+            - "network.publish_host=elasticsearch"
+            - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+            - "xpack.security.enabled=false"
+            - "node.name=elasticsearch"
+            - "node.master=true"
+            - "node.data=true"
+            - "node.ingest=true"
         volumes:
             - elasticsearch-data:/usr/share/elasticsearch/data
             - elasticsearch-plugins:/usr/share/elasticsearch/plugins
         ports:
             - "${ELASTICSEARCH_PORT}:9200"
             - "9300:9300"
-        links:
-            - php-fpm
 
 ### Volumes Setup ###########################################
 
