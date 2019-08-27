@@ -30,7 +30,7 @@ RUN apt-get update && \
         libc-client-dev \
         libkrb5-dev \
         poppler-utils \
-        mysql-client \
+        mariadb-client \
         htop
 
 RUN docker-php-ext-install mcrypt

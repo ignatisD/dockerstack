@@ -38,7 +38,7 @@ RUN apt-get install -y \
         libz-dev \
         libpq-dev \
         libjpeg-dev \
-        libpng12-dev \
+        libpng-dev \
         libfreetype6-dev \
         libssl-dev \
         libmcrypt-dev \
@@ -46,7 +46,6 @@ RUN apt-get install -y \
         git \
         curl \
         nano \
-        postgresql-client \
         mysql-client \
         htop \
         poppler-utils \
