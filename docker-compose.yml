@@ -43,28 +43,28 @@ services:
           - "8.8.4.4"
         dns_search: '' #fix for windows dns resolve.conf
         image: ignatisd/workspace:${WORKSPACE_PHP_VERSION}
-        build:
-            context: ./workspace
-            args:
-                - COMPOSER_GLOBAL_INSTALL=${COMPOSER_GLOBAL_INSTALL}
-                - INSTALL_WORKSPACE_SSH=${INSTALL_WORKSPACE_SSH}
-                - INSTALL_SOAP=${INSTALL_SOAP}
-                - INSTALL_ZIP_ARCHIVE=${INSTALL_ZIP_ARCHIVE}
-                - INSTALL_BCMATH=${INSTALL_BCMATH}
-                - INSTALL_PHPREDIS=${INSTALL_PHPREDIS}
-                - INSTALL_MEMCACHED=${INSTALL_MEMCACHED}
-                - INSTALL_GETTEXT=${INSTALL_GETTEXT}
-                - INSTALL_XDEBUG=${INSTALL_XDEBUG}
-                - INSTALL_MONGO=${INSTALL_MONGO}
-                - INSTALL_IMAP=${INSTALL_IMAP}
-                - INSTALL_OPCACHE=${INSTALL_OPCACHE}
-                - INSTALL_EXIF=${INSTALL_EXIF}
-                - INSTALL_AEROSPIKE_EXTENSION=${INSTALL_AEROSPIKE_EXTENSION}
-                - CODEIGNITER=${CODEIGNITER}
-                - PUID=1000
-                - PGID=1000
-                - TZ=${TZ}
-            dockerfile: Dockerfile-${WORKSPACE_PHP_VERSION}
+#        build:
+#            context: ./workspace
+#            args:
+#                - COMPOSER_GLOBAL_INSTALL=${COMPOSER_GLOBAL_INSTALL}
+#                - INSTALL_WORKSPACE_SSH=${INSTALL_WORKSPACE_SSH}
+#                - INSTALL_SOAP=${INSTALL_SOAP}
+#                - INSTALL_ZIP_ARCHIVE=${INSTALL_ZIP_ARCHIVE}
+#                - INSTALL_BCMATH=${INSTALL_BCMATH}
+#                - INSTALL_PHPREDIS=${INSTALL_PHPREDIS}
+#                - INSTALL_MEMCACHED=${INSTALL_MEMCACHED}
+#                - INSTALL_GETTEXT=${INSTALL_GETTEXT}
+#                - INSTALL_XDEBUG=${INSTALL_XDEBUG}
+#                - INSTALL_MONGO=${INSTALL_MONGO}
+#                - INSTALL_IMAP=${INSTALL_IMAP}
+#                - INSTALL_OPCACHE=${INSTALL_OPCACHE}
+#                - INSTALL_EXIF=${INSTALL_EXIF}
+#                - INSTALL_AEROSPIKE_EXTENSION=${INSTALL_AEROSPIKE_EXTENSION}
+#                - CODEIGNITER=${CODEIGNITER}
+#                - PUID=1000
+#                - PGID=1000
+#                - TZ=${TZ}
+#            dockerfile: Dockerfile-${WORKSPACE_PHP_VERSION}
         volumes_from:
             - applications
         extra_hosts:
@@ -86,23 +86,23 @@ services:
           - "8.8.4.4"
         dns_search: '' #fix for windows dns resolve.conf
         image: ignatisd/php-fpm:${PHP_VERSION}
-        build:
-            context: ./php-fpm
-            args:
-                - INSTALL_SOAP=${INSTALL_SOAP}
-                - INSTALL_ZIP_ARCHIVE=${INSTALL_ZIP_ARCHIVE}
-                - INSTALL_BCMATH=${INSTALL_BCMATH}
-                - INSTALL_PHPREDIS=${INSTALL_PHPREDIS}
-                - INSTALL_MEMCACHED=${INSTALL_MEMCACHED}
-                - INSTALL_GETTEXT=${INSTALL_GETTEXT}
-                - INSTALL_XDEBUG=${INSTALL_XDEBUG}
-                - INSTALL_MONGO=${INSTALL_MONGO}
-                - INSTALL_IMAP=${INSTALL_IMAP}
-                - INSTALL_OPCACHE=${INSTALL_OPCACHE}
-                - INSTALL_EXIF=${INSTALL_EXIF}
-                - INSTALL_AEROSPIKE_EXTENSION=${INSTALL_AEROSPIKE_EXTENSION}
-                - CODEIGNITER=false
-            dockerfile: Dockerfile-${PHP_VERSION}
+#        build:
+#            context: ./php-fpm
+#            args:
+#                - INSTALL_SOAP=${INSTALL_SOAP}
+#                - INSTALL_ZIP_ARCHIVE=${INSTALL_ZIP_ARCHIVE}
+#                - INSTALL_BCMATH=${INSTALL_BCMATH}
+#                - INSTALL_PHPREDIS=${INSTALL_PHPREDIS}
+#                - INSTALL_MEMCACHED=${INSTALL_MEMCACHED}
+#                - INSTALL_GETTEXT=${INSTALL_GETTEXT}
+#                - INSTALL_XDEBUG=${INSTALL_XDEBUG}
+#                - INSTALL_MONGO=${INSTALL_MONGO}
+#                - INSTALL_IMAP=${INSTALL_IMAP}
+#                - INSTALL_OPCACHE=${INSTALL_OPCACHE}
+#                - INSTALL_EXIF=${INSTALL_EXIF}
+#                - INSTALL_AEROSPIKE_EXTENSION=${INSTALL_AEROSPIKE_EXTENSION}
+#                - CODEIGNITER=false
+#            dockerfile: Dockerfile-${PHP_VERSION}
         volumes_from:
             - applications
         ports:
