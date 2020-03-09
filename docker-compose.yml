@@ -344,7 +344,7 @@ services:
           - "8.8.8.8"
           - "8.8.4.4"
         dns_search: '' #fix for windows dns resolve.conf
-        image: phpmyadmin/phpmyadmin
+        image: phpmyadmin/phpmyadmin:5.0.1
         volumes:
           - sessions:/sessions
         environment:
@@ -352,6 +352,7 @@ services:
             MYSQL_USER: ${DB_USER}
             MYSQL_PASSWORD: ${DB_PASS}
             MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
+            UPLOAD_LIMIT: 256000
         ports:
             - "${PHPMYADMIN_PORT}:80"
 
