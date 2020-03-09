@@ -352,7 +352,7 @@ services:
             MYSQL_USER: ${DB_USER}
             MYSQL_PASSWORD: ${DB_PASS}
             MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
-            UPLOAD_LIMIT: 256000
+            UPLOAD_LIMIT: 256000000
         ports:
             - "${PHPMYADMIN_PORT}:80"
 
