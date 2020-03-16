@@ -1,0 +1,128 @@
+version: "3.7"
+
+## Volumes Setup
+
+volumes:
+    apache2:
+        driver: "local"
+    nginx:
+        driver: "local"
+    sessions:
+        driver: "local"
+
+## Services Setup
+
+services:
+
+  ### Workspace Utilities Container ###########################
+
+  workspace:
+    hostname: workspace
+    image: ignatisd/workspace:${WORKSPACE_PHP_VERSION}
+    volumes:
+      - ${APPLICATIONS}:/var/www
+      - ./ssl/:/etc/ssl
+    tty: true
+
+  ### PHP-FPM Container #######################################
+
+  php-fpm:
+    hostname: php-fpm
+    image: ignatisd/php-fpm:${PHP_VERSION}
+    volumes:
+      - ${APPLICATIONS}:/var/www
+      - ./ssl/:/etc/ssl
+    environment:
+      # IMPORTANT: Set the Remote Interpreter entry matching name to `laravel`
+      - PHP_IDE_CONFIG=serverName=laravel
+
+  ### Nginx Server Container ##################################
+
+  nginx:
+    hostname: nginx
+    image: nginx:1.17.9
+    volumes:
+      - ${APPLICATIONS}:/var/www
+      - ./ssl/:/etc/ssl
+      - nginx:/var/log/nginx
+      - ./nginx/sites-enabled/:/etc/nginx/sites-enabled
+      - ./nginx/conf.d/:/etc/nginx/conf.d
+      - ./nginx/nginx.conf/:/etc/nginx/nginx.conf
+    ports:
+      - target: 80
+        published: ${HTTP_PORT:-80}
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: ${HTTPS_PORT:-443}
+        protocol: tcp
+        mode: host
+
+  ### Apache Server Container #################################
+
+  apache2:
+    hostname: apache2
+    image: ignatisd/apache2
+    build:
+      context: ./apache2
+      args:
+        - PHP_SOCKET=php-fpm:9000
+    volumes:
+      - ${APPLICATIONS}:/var/www
+      - ./ssl/:/etc/ssl
+      - apache2:/var/log/apache2
+
+
+  ### MySQL Container #########################################
+
+  mysql:
+    hostname: mysql
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+    volumes:
+      - ${DATA_SAVE_PATH}/mysql:/var/lib/mysql
+      - ./mysql/conf.d/:/etc/mysql/conf.d/
+    ports:
+      - target: 3306
+        published: ${DB_PORT:-3306}
+        protocol: tcp
+        mode: host
+
+  ### Mailhog Container #########################################
+
+  mailhog:
+    hostname: mailhog
+    image: mailhog/mailhog
+    ports:
+      - target: 1025
+        published: 1025
+        protocol: tcp
+        mode: host
+      - target: 8025
+        published: 8025
+        protocol: tcp
+        mode: host
+
+  ### phpMyAdmin Container ####################################
+
+  phpmyadmin:
+    hostname: phpmyadmin
+    image: phpmyadmin/phpmyadmin:5.0.1
+    volumes:
+      - sessions:/sessions
+    environment:
+      PMA_ARBITRARY: 1
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
+      UPLOAD_LIMIT: 256000000
+    ports:
+      - target: 80
+        published: ${PHPMYADMIN_PORT:-8080}
+        protocol: tcp
+        mode: host
+

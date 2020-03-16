@@ -245,7 +245,12 @@ RUN if [ ${CODEIGNITER} = true ]; then \
      docker-php-ext-install tokenizer \
 ;fi
 
-
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libgmp-dev re2c libmhash-dev libmcrypt-dev file
+RUN ln -s /usr/include/x86_64-linux-gnu/gmp.h /usr/local/include/
+RUN docker-php-ext-configure gmp && \
+    docker-php-ext-install gmp
 #
 #--------------------------------------------------------------------------
 # Final Touch

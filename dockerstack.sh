@@ -2,6 +2,7 @@
 if [[ ! -f ".env" ]]; then
     cp .env.example .env
 fi
+export $(egrep -v '^#' .env | xargs)
 if [[ ! -f "ssl/server.crt.pem" ]] || [[ ! -f "ssl/server.key.pem" ]]; then
     cp ssl/default/server.bundle.pem ssl/server.bundle.pem
     cp ssl/default/server.crt.pem ssl/server.crt.pem
@@ -58,6 +59,10 @@ while true; do
     echo "20. composer dump-autoload"
     echo "21. Build LAMP containers"
     echo "22. Build MEAN containers"
+    echo "==============================="
+    echo "23. Deploy LAMP Stack"
+    echo "24. Remove LAMP Stack"
+    echo "==============================="
     echo "0. Edit .env file"
     echo ""
     echo -n "Select a number or type a command: "
@@ -221,6 +226,12 @@ while true; do
         docker-compose rm -f
         docker-compose build node mongo mailhog nginx-node
         dockerps
+        ;;
+    23)
+        docker stack deploy -c lamp-compose.yml dev
+        ;;
+    24)
+        docker stack rm dev
         ;;
     0)
         if command -v gedit >/dev/null; then

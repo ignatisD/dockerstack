@@ -2,7 +2,7 @@
 Version=1.0
 Type=Application
 Terminal=true
-Icon=/full/path/to/dockerstack/icons/lamp.png
+Icon=/full/path/to/dockerstack/icons/dockerstack.png
 Name=Docker Stack Menu
-Exec=bash -c "cd ~/full/path/to/dockerstack && ./dockerstack.sh"
+Exec=bash -c "cd ~/path/to/dockerstack && ./dockerstack.sh"
 Comment=Opens Docker Stack menu script
