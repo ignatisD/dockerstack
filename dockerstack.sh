@@ -231,7 +231,7 @@ while true; do
         docker stack deploy -c lamp-compose.yml dev
         ;;
     24)
-        docker stack rm dev
+        docker service rm dev_workspace dev_php-fpm dev_nginx dev_apache2 dev_mysql dev_mailhog dev_phpmyadmin
         ;;
     0)
         if command -v gedit >/dev/null; then
