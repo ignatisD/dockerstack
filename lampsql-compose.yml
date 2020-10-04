@@ -1,0 +1,65 @@
+version: "3.7"
+
+## Volumes Setup
+
+volumes:
+    sessions:
+        driver: "local"
+
+## Services Setup
+
+services:
+
+  ### MySQL Container #########################################
+
+  mysql:
+    hostname: mysql
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+    volumes:
+      - ${DATA_SAVE_PATH}/mysql:/var/lib/mysql
+      - ./mysql/conf.d/:/etc/mysql/conf.d/
+    ports:
+      - target: 3306
+        published: ${DB_PORT:-3306}
+        protocol: tcp
+        mode: host
+
+  ### Mailhog Container #########################################
+
+  mailhog:
+    hostname: mailhog
+    image: mailhog/mailhog
+    ports:
+      - target: 1025
+        published: 1025
+        protocol: tcp
+        mode: host
+      - target: 8025
+        published: 8025
+        protocol: tcp
+        mode: host
+
+  ### phpMyAdmin Container ####################################
+
+  phpmyadmin:
+    hostname: phpmyadmin
+    image: phpmyadmin/phpmyadmin:5.0.1
+    volumes:
+      - sessions:/sessions
+    environment:
+      PMA_ARBITRARY: 1
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
+      UPLOAD_LIMIT: 256000000
+    ports:
+      - target: 80
+        published: ${PHPMYADMIN_PORT:-8080}
+        protocol: tcp
+        mode: host
+

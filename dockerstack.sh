@@ -62,6 +62,7 @@ while true; do
     echo "==============================="
     echo "23. Deploy LAMP Stack"
     echo "24. Remove LAMP Stack"
+    echo "25. Reload LAMP Stack"
     echo "==============================="
     echo "0. Edit .env file"
     echo ""
@@ -229,9 +230,16 @@ while true; do
         ;;
     23)
         docker stack deploy -c lamp-compose.yml dev
+        docker stack deploy -c lampsql-compose.yml dev
         ;;
     24)
         docker service rm dev_workspace dev_php-fpm dev_nginx dev_apache2 dev_mysql dev_mailhog dev_phpmyadmin
+        ;;
+    25)
+        docker service rm dev_workspace dev_php-fpm dev_nginx dev_apache2
+        export $(egrep -v '^#' .env | xargs)
+        sleep 3
+        docker stack deploy -c lamp-compose.yml dev
         ;;
     0)
         if command -v gedit >/dev/null; then
