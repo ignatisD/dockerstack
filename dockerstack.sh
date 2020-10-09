@@ -3,6 +3,7 @@ if [[ ! -f ".env" ]]; then
     cp .env.example .env
 fi
 export $(egrep -v '^#' .env | xargs)
+STACK=${STACK:-dev}
 if [[ ! -f "ssl/server.crt.pem" ]] || [[ ! -f "ssl/server.key.pem" ]]; then
     cp ssl/default/server.bundle.pem ssl/server.bundle.pem
     cp ssl/default/server.crt.pem ssl/server.crt.pem
