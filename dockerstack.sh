@@ -229,17 +229,17 @@ while true; do
         dockerps
         ;;
     23)
-        docker stack deploy -c lamp-compose.yml dev
-        docker stack deploy -c lampsql-compose.yml dev
+        docker stack deploy -c lamp-compose.yml ${STACK}
+        docker stack deploy -c lampsql-compose.yml ${STACK}
         ;;
     24)
-        docker service rm dev_workspace dev_php-fpm dev_nginx dev_apache2 dev_mysql dev_mailhog dev_phpmyadmin
+        docker service rm ${STACK}_workspace ${STACK}_php-fpm ${STACK}_http ${STACK}_apache2 ${STACK}_mysql ${STACK}_mailhog ${STACK}_phpmyadmin
         ;;
     25)
-        docker service rm dev_workspace dev_php-fpm dev_nginx dev_apache2
+        docker service rm ${STACK}_workspace ${STACK}_php-fpm ${STACK}_http ${STACK}_apache2
         export $(egrep -v '^#' .env | xargs)
         sleep 3
-        docker stack deploy -c lamp-compose.yml dev
+        docker stack deploy -c lamp-compose.yml ${STACK}
         ;;
     0)
         if command -v gedit >/dev/null; then

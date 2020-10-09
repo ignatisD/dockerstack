@@ -36,9 +36,9 @@ services:
 
   ### Nginx Server Container ##################################
 
-  nginx:
-    hostname: nginx
-    image: nginx:1.17.9
+  http:
+    hostname: http
+    image: nginx:${NGINX_VERSION:-1.19.2}
     volumes:
       - ${APPLICATIONS}:/var/www
       - ./ssl/:/etc/ssl
