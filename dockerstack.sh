@@ -230,6 +230,7 @@ while true; do
         dockerps
         ;;
     23)
+        export $(egrep -v '^#' .env | xargs)
         docker stack deploy -c lamp-compose.yml ${STACK}
         docker stack deploy -c lampsql-compose.yml ${STACK}
         ;;
