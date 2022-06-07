@@ -60,6 +60,9 @@ RUN docker-php-ext-install pdo_mysql
 # Install the PHP mysqli extention
 RUN docker-php-ext-install mysqli
 
+# Install the PHP gd extention
+RUN docker-php-ext-install gd
+
 #####################################
 # Composer:
 #####################################
