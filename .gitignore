@@ -6,6 +6,7 @@ _guides
 .env
 
 ssl/*.pem
+ssl/certs/*
 !ssl/ca*.pem
 
 
